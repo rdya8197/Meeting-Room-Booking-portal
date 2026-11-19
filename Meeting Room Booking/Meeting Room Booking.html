@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نظام حجز قاعات الاجتماعات — مستشفى الرعاية المديدة بالظهران</title>
+  <!-- تحميل خط Cairo عبر Google Fonts لدعم اللغة العربية بشكل أنيق ومقروء -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- تحميل Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+          },
+          colors: {
+            medical: {
+              50: '#f1f4f7',
+              100: '#dde3e9',
+              200: '#bcc7d2',
+              500: '#3E4C59',
+              600: '#4b5b6a',
+              700: '#34404b',
+              800: '#29333c',
+              900: '#1f272e',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #3E4C59;
+      color: #1f272e;
+    }
+
+    /* تخصيص شريط التمرير بشكل ناعم */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #2c3741;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #5b6d7e;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #738698;
+    }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #3E4C59;
+      color: #0f172a;
+    }
+
+    /* تخصيص شريط التمرير بشكل ناعم */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#3E4C59] text-slate-900 antialiased selection:bg-[#3E4C59] selection:text-white">
+
+  <!-- الشريط العلوي للهوية المؤسسية للمستشفى -->
+  <header class="bg-[#34404b] border-b border-[#4f6070] sticky top-0 z-30 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <!-- شعار واسم المستشفى والنظام -->
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#3E4C59] to-[#242d35] border border-[#627688] text-white flex items-center justify-center shadow-md shadow-black/25 shrink-0">
+            <!-- أيقونة طبية هندسية SVG -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              <rect x="3" y="3" width="18" height="18" rx="4" stroke-width="1.8" class="opacity-65" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#3E4C59] text-[#f1f4f7] border border-[#5d7082]">
+                مستشفى الرعاية المديدة — الظهران
+              </span>
+              <span id="todayBadge" class="text-xs font-medium text-[#cbd5e1]"></span>
+            </div>
+            <h1 class="text-lg sm:text-xl font-extrabold text-white mt-0.5">
+              نظام حجز قاعات الاجتماعات
+            </h1>
+          </div>
+        </div>
+
+        <!-- ملخص سريع لعدد الحجوزات المسجلة فعلياً -->
+        <div class="flex items-center gap-3 self-start md:self-auto">
+          <div class="bg-[#3E4C59] border border-[#566879] rounded-2xl px-4 py-2 flex items-center gap-3 shadow-2xs">
+            <div class="w-2.5 h-2.5 rounded-full bg-[#cbd5e1]"></div>
+            <div class="text-xs sm:text-sm">
+              <span class="text-[#d6dee6] font-medium">إجمالي الحجوزات المسجلة:</span>
+              <span id="totalBookingsCount" class="font-extrabold text-white mr-1">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- المحتوى الرئيسي -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- بطاقات القاعات الثلاث المعتمدة في المستشفى -->
+    <section aria-label="قاعات الاجتماعات المعتمدة" class="mb-7">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- القاعة 1 -->
+        <div class="bg-[#f8fafc] border border-[#cbd5e1] rounded-2xl p-4 shadow-sm hover:border-[#3E4C59] transition-colors">
+          <div class="flex items-start justify-between gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#3E4C59] text-white border border-[#2c3741] flex items-center justify-center shrink-0 shadow-2xs">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7a2 2 0 012-2h10a2 2 0 012 2v14M9 9h1m4 0h1m-5 4h1m4 0h1" />
+              </svg>
+            </div>
+            <span id="roomCount-0" class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#e5ebf0] text-[#3E4C59] border border-[#c6d1dc]">
+              0 حجز
+            </span>
+          </div>
+          <h2 class="text-sm sm:text-base font-bold text-slate-900 mt-3">
+            قاعة اجتماعات داخلية المبنى الرئيسي (1)
+          </h2>
+          <p class="text-xs text-slate-600 mt-1">
+            مناسبة لاجتماعات الإدارات واللجان الداخلية بالمبنى الرئيسي.
+          </p>
+        </div>
+
+        <!-- القاعة 2 -->
+        <div class="bg-[#f8fafc] border border-[#cbd5e1] rounded-2xl p-4 shadow-sm hover:border-[#3E4C59] transition-colors">
+          <div class="flex items-start justify-between gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#3E4C59] text-white border border-[#2c3741] flex items-center justify-center shrink-0 shadow-2xs">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm4 4h8m-8 4h5" />
+              </svg>
+            </div>
+            <span id="roomCount-1" class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#e5ebf0] text-[#3E4C59] border border-[#c6d1dc]">
+              0 حجز
+            </span>
+          </div>
+          <h2 class="text-sm sm:text-base font-bold text-slate-900 mt-3">
+            قاعة اجتماعات الزجاجيه
+          </h2>
+          <p class="text-xs text-slate-600 mt-1">
+            مخصصة للاجتماعات التنسيقية والمناقشات بين الأقسام.
+          </p>
+        </div>
+
+        <!-- القاعة 3 -->
+        <div class="bg-[#f8fafc] border border-[#cbd5e1] rounded-2xl p-4 shadow-sm hover:border-[#3E4C59] transition-colors">
+          <div class="flex items-start justify-between gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#3E4C59] text-white border border-[#2c3741] flex items-center justify-center shrink-0 shadow-2xs">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+              </svg>
+            </div>
+            <span id="roomCount-2" class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#e5ebf0] text-[#3E4C59] border border-[#c6d1dc]">
+              0 حجز
+            </span>
+          </div>
+          <h2 class="text-sm sm:text-base font-bold text-slate-900 mt-3">
+            قاعة المحاضرات المبنى (7)
+          </h2>
+          <p class="text-xs text-slate-600 mt-1">
+            مخصصة للمحاضرات الطبية والورش التدريبية واللقاءات الموسعة.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- شبكة العمل الرئيسية: نموذج الحجز على اليمين وقائمة الحجوزات المسجلة على اليسار -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
+
+      <!-- عمود نموذج الحجز / التعديل -->
+      <section class="lg:col-span-5 bg-[#f8fafc] border border-[#cbd5e1] rounded-2xl p-5 sm:p-6 shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-5">
+          <div>
+            <h2 id="formTitle" class="text-base sm:text-lg font-extrabold text-slate-900">
+              حجز قاعة اجتماع جديدة
+            </h2>
+            <p id="formSubtitle" class="text-xs text-slate-600 mt-0.5">
+              اختر القاعة والتاريخ والوقت مع التحقق الفوري من عدم وجود تعارض
+            </p>
+          </div>
+          <button
+            type="button"
+            id="cancelEditBtn"
+            onclick="cancelEditMode()"
+            class="hidden text-xs font-bold px-3 py-1.5 rounded-xl bg-[#e5ebf0] hover:bg-[#d5dfe7] text-[#3E4C59] border border-[#c6d1dc] transition-colors cursor-pointer"
+          >
+            إلغاء التعديل
+          </button>
+        </div>
+
+        <!-- صندوق التنبيهات الفورية (تعارض زمني / خطأ إدخال / نجاح) -->
+        <div id="formAlert" class="hidden mb-5 rounded-2xl p-4 text-xs sm:text-sm border animate-fade-in" role="alert"></div>
+
+        <form id="bookingForm" onsubmit="handleBookingSubmit(event)" class="space-y-4">
+          <!-- اختيار القاعة -->
+          <div>
+            <label for="roomSelect" class="block text-xs sm:text-sm font-bold text-slate-800 mb-1.5">
+              القاعة المطلوبة <span class="text-rose-600">*</span>
+            </label>
+            <select
+              id="roomSelect"
+              required
+              onchange="liveCheckConflict()"
+              class="w-full rounded-xl border border-slate-300 bg-white focus:border-[#3E4C59] focus:ring-4 focus:ring-[#3E4C59]/15 px-3.5 py-2.5 text-sm font-medium text-slate-900 outline-none transition-all"
+            >
+              <option value="" disabled selected>اختر القاعة...</option>
+              <option value="قاعة اجتماعات داخلية المبنى الرئيسي (1)">قاعة اجتماعات داخلية المبنى الرئيسي (1)</option>
+              <option value="قاعة اجتماعات الزجاجيه">قاعة اجتماعات الزجاجيه</option>
+              <option value="قاعة المحاضرات المبنى (7)">قاعة المحاضرات المبنى (7)</option>
+            </select>
+          </div>
+
+          <!-- تاريخ الاجتماع -->
+          <div>
+            <label for="bookingDate" class="block text-xs sm:text-sm font-bold text-slate-800 mb-1.5">
+              تاريخ الاجتماع <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="date"
+              id="bookingDate"
+              required
+              onchange="liveCheckConflict()"
+              class="w-full rounded-xl border border-slate-300 bg-white focus:border-[#3E4C59] focus:ring-4 focus:ring-[#3E4C59]/15 px-3.5 py-2.5 text-sm font-medium text-slate-900 outline-none transition-all"
+            />
+          </div>
+
+          <!-- وقت البداية ووقت النهاية -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label for="startTime" class="block text-xs sm:text-sm font-bold text-slate-800 mb-1.5">
+                وقت البداية <span class="text-rose-600">*</span>
+              </label>
+              <input
+                type="time"
+                id="startTime"
+                required
+                onchange="liveCheckConflict()"
+                class="w-full rounded-xl border border-slate-300 bg-white focus:border-[#3E4C59] focus:ring-4 focus:ring-[#3E4C59]/15 px-3.5 py-2.5 text-sm font-medium text-slate-900 outline-none transition-all"
+              />
+            </div>
+
+            <div>
+              <label for="endTime" class="block text-xs sm:text-sm font-bold text-slate-800 mb-1.5">
+                وقت النهاية <span class="text-rose-600">*</span>
+              </label>
+              <input
+                type="time"
+                id="endTime"
+                required
+                onchange="liveCheckConflict()"
+                class="w-full rounded-xl border border-slate-300 bg-white focus:border-[#3E4C59] focus:ring-4 focus:ring-[#3E4C59]/15 px-3.5 py-2.5 text-sm font-medium text-slate-900 outline-none transition-all"
+              />
+            </div>
+          </div>
+
+          <!-- مؤشر حالة التوفر الفوري أثناء تعبئة البيانات -->
+          <div id="liveConflictStatus" class="hidden rounded-xl px-3.5 py-2.5 text-xs font-semibold border"></div>
+
+          <!-- اسم القسم الطالب للحجز -->
+          <div>
+            <label for="departmentInput" class="block text-xs sm:text-sm font-bold text-slate-800 mb-1.5">
+              القسم <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="text"
+              id="departmentInput"
+              required
+              placeholder="مثال: قسم الجودة، التمريض، الصيدلة، الموارد البشرية..."
+              class="w-full rounded-xl border border-slate-300 bg-white focus:border-[#3E4C59] focus:ring-4 focus:ring-[#3E4C59]/15 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all"
+            />
+          </div>
+
+          <!-- اسم المسؤول أو المنسق -->
+          <div>
+            <label for="organizerInput" class="block text-xs sm:text-sm font-bold text-slate-800 mb-1.5">
+              اسم المسؤول / المنسق <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="text"
+              id="organizerInput"
+              required
+              placeholder="أدخل اسم المسؤول أو المنسق عن الاجتماع"
+              class="w-full rounded-xl border border-slate-300 bg-white focus:border-[#3E4C59] focus:ring-4 focus:ring-[#3E4C59]/15 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all"
+            />
+          </div>
+
+          <!-- موضوع الاجتماع -->
+          <div>
+            <label for="topicInput" class="block text-xs sm:text-sm font-bold text-slate-800 mb-1.5">
+              موضوع الاجتماع <span class="text-rose-600">*</span>
+            </label>
+            <textarea
+              id="topicInput"
+              rows="2"
+              required
+              placeholder="اكتب عنوان أو موضوع الاجتماع باختصار..."
+              class="w-full rounded-xl border border-slate-300 bg-white focus:border-[#3E4C59] focus:ring-4 focus:ring-[#3E4C59]/15 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all resize-none"
+            ></textarea>
+          </div>
+
+          <!-- أزرار الإرسال وإعادة التعيين -->
+          <div class="pt-2 flex flex-col sm:flex-row gap-2.5">
+            <button
+              type="submit"
+              id="submitBtn"
+              class="flex-1 bg-[#3E4C59] hover:bg-[#2f3a44] active:bg-[#222a32] text-white font-bold text-sm py-3 px-4 rounded-xl shadow-sm shadow-[#3E4C59]/30 transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span id="submitBtnText">تأكيد حجز القاعة</span>
+            </button>
+
+            <button
+              type="button"
+              onclick="resetFormFields()"
+              class="sm:w-auto bg-[#e5ebf0] hover:bg-[#d5dfe7] text-[#3E4C59] border border-[#c6d1dc] font-bold text-sm py-3 px-4 rounded-xl transition-colors cursor-pointer"
+            >
+              تفريغ الحقول
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- عمود عرض الحجوزات المسجلة فعلياً والبحث والفلترة -->
+      <section class="lg:col-span-7 bg-[#f8fafc] border border-[#cbd5e1] rounded-2xl p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 pb-4 mb-5">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">
+              الحجوزات المسجلة
+            </h2>
+            <p class="text-xs text-slate-600 mt-0.5">
+              قائمة الحجوزات الفعالة مع إمكانية البحث والفلترة والتعديل أو الإلغاء
+            </p>
+          </div>
+          <span id="filteredCountBadge" class="self-start sm:self-auto text-xs font-bold px-3 py-1 rounded-full bg-[#3E4C59] text-white">
+            0 نتيجة
+          </span>
+        </div>
+
+        <!-- أدوات الفلترة والبحث: حسب القاعة، التاريخ، أو القسم/الموضوع -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5 bg-[#eef2f6] border border-[#cfd8e0] rounded-2xl p-3.5">
+          <div>
+            <label for="filterRoom" class="block text-xs font-bold text-[#3E4C59] mb-1">
+              فلترة حسب القاعة
+            </label>
+            <select
+              id="filterRoom"
+              onchange="renderBookings()"
+              class="w-full rounded-xl border border-slate-300 bg-white focus:border-[#3E4C59] px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 outline-none"
+            >
+              <option value="ALL">جميع القاعات</option>
+              <option value="قاعة اجتماعات داخلية المبنى الرئيسي (1)">قاعة اجتماعات داخلية المبنى الرئيسي (1)</option>
+              <option value="قاعة اجتماعات الزجاجيه">قاعة اجتماعات الزجاجيه</option>
+              <option value="قاعة المحاضرات المبنى (7)">قاعة المحاضرات المبنى (7)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="filterDate" class="block text-xs font-bold text-[#3E4C59] mb-1">
+              فلترة حسب التاريخ
+            </label>
+            <input
+              type="date"
+              id="filterDate"
+              onchange="renderBookings()"
+              class="w-full rounded-xl border border-slate-300 bg-white focus:border-[#3E4C59] px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 outline-none"
+            />
+          </div>
+
+          <div>
+            <label for="filterSearch" class="block text-xs font-bold text-[#3E4C59] mb-1">
+              بحث بالقسم أو الموضوع
+            </label>
+            <input
+              type="text"
+              id="filterSearch"
+              oninput="renderBookings()"
+              placeholder="اكتب للبحث..."
+              class="w-full rounded-xl border border-slate-300 bg-white focus:border-[#3E4C59] px-3 py-2 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 outline-none"
+            />
+          </div>
+        </div>
+
+        <!-- زر مسح الفلاتر يظهر عند تفعيل أي فلتر -->
+        <div id="clearFiltersBar" class="hidden mb-4 flex justify-end">
+          <button
+            type="button"
+            onclick="clearAllFilters()"
+            class="text-xs font-bold text-white hover:bg-[#2f3a44] bg-[#3E4C59] px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+          >
+            إعادة ضبط الفلاتر والبحث
+          </button>
+        </div>
+
+        <!-- حاوية بطاقات الحجوزات -->
+        <div id="bookingsContainer" class="space-y-3.5"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- تذييل الصفحة -->
+  <footer class="bg-[#34404b] border-t border-[#4f6070] mt-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#d6dee6]">
+      <span>مستشفى الرعاية المديدة بالظهران — نظام إدارة وحجز قاعات الاجتماعات</span>
+      <span>يتم حفظ البيانات محلياً في المتصفح بشكل تلقائي</span>
+    </div>
+  </footer>
+
+  <!-- نافذة تأكيد أنيقة لإلغاء الحجز (بديل احترافي عن confirm) -->
+  <div
+    id="deleteModal"
+    class="hidden fixed inset-0 z-50 bg-[#182026]/65 backdrop-blur-2xs flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="deleteModalTitle"
+  >
+    <div class="bg-[#f8fafc] border border-[#cbd5e1] rounded-2xl max-w-md w-full p-6 shadow-xl animate-fade-in">
+      <div class="flex items-start gap-3.5">
+        <div class="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 id="deleteModalTitle" class="text-base font-extrabold text-slate-900">
+            تأكيد إلغاء حجز القاعة
+          </h3>
+          <p id="deleteModalDescription" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+            هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟ لن يمكن التراجع عن هذا الإجراء.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex items-center justify-end gap-2.5">
+        <button
+          type="button"
+          onclick="closeDeleteModal()"
+          class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+        >
+          تراجع
+        </button>
+        <button
+          type="button"
+          id="confirmDeleteBtn"
+          class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm shadow-rose-600/20 transition-colors cursor-pointer"
+        >
+          نعم، إلغاء الحجز
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * الثوابت والإعدادات الأساسية للنظام
+     * القاعات الثلاث المعتمدة في مستشفى الرعاية المديدة بالظهران فقط.
+     */
+    const ROOMS = [
+      'قاعة اجتماعات داخلية المبنى الرئيسي (1)',
+      'قاعة اجتماعات الزجاجيه',
+      'قاعة المحاضرات المبنى (7)'
+    ];
+
+    const STORAGE_KEY = 'prolonged_care_dhahran_room_bookings_v1';
+
+    // حالة التطبيق في الذاكرة
+    let bookings = [];
+    let editingBookingId = null;
+    let pendingDeleteId = null;
+
+    /**
+     * تهيئة التطبيق عند تحميل الصفحة
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+      displayCurrentArabicDate();
+      setDefaultDateInput();
+      loadBookingsFromStorage();
+      renderAll();
+    });
+
+    /**
+     * عرض تاريخ اليوم باللغة العربية في الشريط العلوي
+     */
+    function displayCurrentArabicDate() {
+      try {
+        const el = document.getElementById('todayBadge');
+        const now = new Date();
+        const formatted = new Intl.DateTimeFormat('ar-SA', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }).format(now);
+        el.textContent = `• ${formatted}`;
+      } catch (err) {
+        // تجاهل الخطأ في حال عدم دعم التنسيق في بيئة قديمة
+      }
+    }
+
+    /**
+     * ضبط حقل التاريخ الافتراضي على تاريخ اليوم المحلي
+     */
+    function setDefaultDateInput() {
+      const dateInput = document.getElementById('bookingDate');
+      if (!dateInput.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        dateInput.value = `${year}-${month}-${day}`;
+      }
+    }
+
+    /**
+     * تحميل الحجوزات من localStorage بأمان (يبدأ فارغاً [] في حال عدم وجود بيانات)
+     */
+    function loadBookingsFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          bookings = [];
+          return;
+        }
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) {
+          bookings = [];
+          return;
+        }
+        // فلترة البيانات للتأكد من انتمائها للقاعات الثلاث المعتمدة فقط
+        bookings = parsed.filter(
+          (item) =>
+            item &&
+            typeof item.id === 'string' &&
+            ROOMS.includes(item.room) &&
+            typeof item.date === 'string' &&
+            typeof item.startTime === 'string' &&
+            typeof item.endTime === 'string' &&
+            typeof item.department === 'string' &&
+            typeof item.organizer === 'string' &&
+            typeof item.topic === 'string'
+        );
+      } catch (error) {
+        console.error('تعذر قراءة الحجوزات من التخزين المحلي:', error);
+        bookings = [];
+      }
+    }
+
+    /**
+     * حفظ الحجوزات الحالية في localStorage
+     */
+    function saveBookingsToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+      } catch (error) {
+        showFormAlert(
+          'error',
+          'تعذر حفظ الحجز في ذاكرة المتصفح. يرجى التحقق من مساحة التخزين أو إعدادات المتصفح.'
+        );
+      }
+    }
+
+    /**
+     * تحويل وقت (HH:MM) إلى عدد الدقائق منذ منتصف الليل لتسهيل المقارنة الدقيقة
+     */
+    function timeToMinutes(timeStr) {
+      if (!timeStr || typeof timeStr !== 'string') return NaN;
+      const parts = timeStr.split(':');
+      if (parts.length !== 2) return NaN;
+      const hours = Number(parts[0]);
+      const minutes = Number(parts[1]);
+      if (Number.isNaN(hours) || Number.isNaN(minutes)) return NaN;
+      return hours * 60 + minutes;
+    }
+
+    /**
+     * تنسيق الوقت بنظام 12 ساعة بالعربية (صباحاً / مساءً) مع الحفاظ على الوضوح
+     */
+    function formatArabicTime(timeStr) {
+      const mins = timeToMinutes(timeStr);
+      if (Number.isNaN(mins)) return timeStr;
+      const h24 = Math.floor(mins / 60);
+      const m = String(mins % 60).padStart(2, '0');
+      const period = h24 >= 12 ? 'مساءً' : 'صباحاً';
+      let h12 = h24 % 12;
+      if (h12 === 0) h12 = 12;
+      return `${h12}:${m} ${period}`;
+    }
+
+    /**
+     * تنسيق التاريخ بشكل مقروء بالعربية
+     */
+    function formatArabicDate(dateStr) {
+      try {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        if (!y || !m || !d) return dateStr;
+        const dateObj = new Date(y, m - 1, d);
+        return new Intl.DateTimeFormat('ar-SA', {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        }).format(dateObj);
+      } catch {
+        return dateStr;
+      }
+    }
+
+    /**
+     * فحص التعارض الزمني على نفس القاعة وفي نفس اليوم:
+     * تتداخل فترتان [startA, endA) و [startB, endB) إذا وفقط إذا:
+     * startA < endB AND endA > startB
+     * (ملاحظة: الحجز المتتالي مثل 10:00-11:00 و 11:00-12:00 لا يعتبر تعارضاً)
+     */
+    function findConflictingBooking({ room, date, startTime, endTime, ignoreId = null }) {
+      const newStart = timeToMinutes(startTime);
+      const newEnd = timeToMinutes(endTime);
+
+      if (Number.isNaN(newStart) || Number.isNaN(newEnd) || newEnd <= newStart) {
+        return null;
+      }
+
+      return (
+        bookings.find((item) => {
+          if (ignoreId && item.id === ignoreId) return false;
+          if (item.room !== room || item.date !== date) return false;
+
+          const existingStart = timeToMinutes(item.startTime);
+          const existingEnd = timeToMinutes(item.endTime);
+
+          if (Number.isNaN(existingStart) || Number.isNaN(existingEnd)) return false;
+
+          return newStart < existingEnd && newEnd > existingStart;
+        }) || null
+      );
+    }
+
+    /**
+     * فحص فوري أثناء اختيار القاعة والتاريخ والوقت في النموذج
+     */
+    function liveCheckConflict() {
+      const room = document.getElementById('roomSelect').value;
+      const date = document.getElementById('bookingDate').value;
+      const startTime = document.getElementById('startTime').value;
+      const endTime = document.getElementById('endTime').value;
+      const statusBox = document.getElementById('liveConflictStatus');
+
+      if (!room || !date || !startTime || !endTime) {
+        statusBox.classList.add('hidden');
+        statusBox.textContent = '';
+        return;
+      }
+
+      const startMins = timeToMinutes(startTime);
+      const endMins = timeToMinutes(endTime);
+
+      if (endMins <= startMins) {
+        statusBox.className =
+          'rounded-xl px-3.5 py-2.5 text-xs font-bold border bg-amber-50 text-amber-800 border-amber-200 block';
+        statusBox.textContent = 'تنبيه: يجب أن يكون وقت النهاية بعد وقت البداية.';
+        return;
+      }
+
+      const conflict = findConflictingBooking({
+        room,
+        date,
+        startTime,
+        endTime,
+        ignoreId: editingBookingId
+      });
+
+      if (conflict) {
+        statusBox.className =
+          'rounded-xl px-3.5 py-2.5 text-xs font-bold border bg-rose-50 text-rose-800 border-rose-200 block';
+        statusBox.innerHTML = `تعارض زمني في هذه القاعة! محجوز لصالح <strong>${escapeHtml(
+          conflict.department
+        )}</strong> من <strong>${formatArabicTime(conflict.startTime)}</strong> إلى <strong>${formatArabicTime(
+          conflict.endTime
+        )}</strong>.`;
+      } else {
+        statusBox.className =
+          'rounded-xl px-3.5 py-2.5 text-xs font-bold border bg-[#e5ebf0] text-[#3E4C59] border-[#b8c5d1] block';
+        statusBox.textContent = 'الفترة الزمنية متاحة في هذه القاعة خلال التاريخ المحدد.';
+      }
+    }
+
+    /**
+     * معالجة إرسال نموذج الحجز أو التعديل
+     */
+    function handleBookingSubmit(event) {
+      event.preventDefault();
+      hideFormAlert();
+
+      const room = document.getElementById('roomSelect').value.trim();
+      const date = document.getElementById('bookingDate').value.trim();
+      const startTime = document.getElementById('startTime').value.trim();
+      const endTime = document.getElementById('endTime').value.trim();
+      const department = document.getElementById('departmentInput').value.trim();
+      const organizer = document.getElementById('organizerInput').value.trim();
+      const topic = document.getElementById('topicInput').value.trim();
+
+      // التحقق من صحة الحقول
+      if (!ROOMS.includes(room)) {
+        showFormAlert('error', 'يرجى اختيار إحدى القاعات المعتمدة في المستشفى.');
+        return;
+      }
+
+      if (!date || !startTime || !endTime) {
+        showFormAlert('error', 'يرجى تحديد تاريخ الاجتماع ووقت البداية ووقت النهاية.');
+        return;
+      }
+
+      const startMins = timeToMinutes(startTime);
+      const endMins = timeToMinutes(endTime);
+
+      if (Number.isNaN(startMins) || Number.isNaN(endMins) || endMins <= startMins) {
+        showFormAlert(
+          'error',
+          'وقت النهاية غير صحيح: يجب أن يكون وقت النهاية لاحقاً لوقت البداية.'
+        );
+        return;
+      }
+
+      if (!department || !organizer || !topic) {
+        showFormAlert('error', 'يرجى تعبئة اسم القسم، اسم المسؤول/المنسق، وموضوع الاجتماع.');
+        return;
+      }
+
+      // فحص صارم للتعارض الزمني قبل اعتماد الحجز
+      const conflict = findConflictingBooking({
+        room,
+        date,
+        startTime,
+        endTime,
+        ignoreId: editingBookingId
+      });
+
+      if (conflict) {
+        showFormAlert(
+          'error',
+          `تعذر إتمام الحجز لوجود تعارض زمني في "${room}" يوم ${formatArabicDate(
+            date
+          )}:\nالقاعة محجوزة لقسم (${conflict.department}) من الساعة ${formatArabicTime(
+            conflict.startTime
+          )} حتى الساعة ${formatArabicTime(conflict.endTime)} (${conflict.topic}).`
+        );
+        return;
+      }
+
+      if (editingBookingId) {
+        // تحديث حجز قائم
+        const idx = bookings.findIndex((b) => b.id === editingBookingId);
+        if (idx !== -1) {
+          bookings[idx] = {
+            ...bookings[idx],
+            room,
+            date,
+            startTime,
+            endTime,
+            department,
+            organizer,
+            topic,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        saveBookingsToStorage();
+        cancelEditMode();
+        resetFormFields(false);
+        renderAll();
+        showFormAlert('success', 'تم تحديث بيانات حجز القاعة بنجاح.');
+      } else {
+        // إنشاء حجز جديد
+        const newBooking = {
+          id: `bkg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          room,
+          date,
+          startTime,
+          endTime,
+          department,
+          organizer,
+          topic,
+          createdAt: new Date().toISOString()
+        };
+
+        bookings.push(newBooking);
+        saveBookingsToStorage();
+        resetFormFields(false);
+        renderAll();
+        showFormAlert('success', `تم تأكيد حجز "${room}" لقسم "${department}" بنجاح.`);
+      }
+    }
+
+    /**
+     * بدء وضع تعديل حجز موجود
+     */
+    function startEditBooking(id) {
+      const target = bookings.find((b) => b.id === id);
+      if (!target) return;
+
+      editingBookingId = target.id;
+      document.getElementById('roomSelect').value = target.room;
+      document.getElementById('bookingDate').value = target.date;
+      document.getElementById('startTime').value = target.startTime;
+      document.getElementById('endTime').value = target.endTime;
+      document.getElementById('departmentInput').value = target.department;
+      document.getElementById('organizerInput').value = target.organizer;
+      document.getElementById('topicInput').value = target.topic;
+
+      document.getElementById('formTitle').textContent = 'تعديل حجز القاعة';
+      document.getElementById('formSubtitle').textContent =
+        'عدّل البيانات المطلوبة وسيتم التحقق فوراً من عدم وجود تعارض زمني';
+      document.getElementById('submitBtnText').textContent = 'حفظ التعديلات';
+      document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+      hideFormAlert();
+      liveCheckConflict();
+
+      // التمرير بسلاسة إلى النموذج في الشاشات الصغيرة والمتوسطة
+      document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /**
+     * إلغاء وضع التعديل والعودة لوضع الحجز الجديد
+     */
+    function cancelEditMode() {
+      editingBookingId = null;
+      document.getElementById('formTitle').textContent = 'حجز قاعة اجتماع جديدة';
+      document.getElementById('formSubtitle').textContent =
+        'اختر القاعة والتاريخ والوقت مع التحقق الفوري من عدم وجود تعارض';
+      document.getElementById('submitBtnText').textContent = 'تأكيد حجز القاعة';
+      document.getElementById('cancelEditBtn').classList.add('hidden');
+      document.getElementById('liveConflictStatus').classList.add('hidden');
+    }
+
+    /**
+     * تفريغ حقول النموذج
+     */
+    function resetFormFields(clearAlert = true) {
+      if (editingBookingId) {
+        cancelEditMode();
+      }
+      document.getElementById('roomSelect').value = '';
+      document.getElementById('startTime').value = '';
+      document.getElementById('endTime').value = '';
+      document.getElementById('departmentInput').value = '';
+      document.getElementById('organizerInput').value = '';
+      document.getElementById('topicInput').value = '';
+      document.getElementById('liveConflictStatus').classList.add('hidden');
+      setDefaultDateInput();
+      if (clearAlert) {
+        hideFormAlert();
+      }
+    }
+
+    /**
+     * فتح نافذة تأكيد الإلغاء لحجز محدد
+     */
+    function openDeleteModal(id) {
+      const target = bookings.find((b) => b.id === id);
+      if (!target) return;
+
+      pendingDeleteId = id;
+      const desc = document.getElementById('deleteModalDescription');
+      desc.innerHTML = `هل أنت متأكد من إلغاء حجز <strong>${escapeHtml(
+        target.room
+      )}</strong> التابع لقسم <strong>${escapeHtml(target.department)}</strong> بتاريخ <strong>${escapeHtml(
+        formatArabicDate(target.date)
+      )}</strong> (${formatArabicTime(target.startTime)} - ${formatArabicTime(target.endTime)})؟`;
+
+      const confirmBtn = document.getElementById('confirmDeleteBtn');
+      confirmBtn.onclick = () => {
+        if (pendingDeleteId) {
+          bookings = bookings.filter((b) => b.id !== pendingDeleteId);
+          if (editingBookingId === pendingDeleteId) {
+            cancelEditMode();
+            resetFormFields(false);
+          }
+          saveBookingsToStorage();
+          closeDeleteModal();
+          renderAll();
+          showFormAlert('success', 'تم إلغاء الحجز وإتاحة الفترة الزمنية في القاعة.');
+        }
+      };
+
+      document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    /**
+     * إغلاق نافذة تأكيد الإلغاء
+     */
+    function closeDeleteModal() {
+      pendingDeleteId = null;
+      document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    /**
+     * إظهار رسالة تنبيه في النموذج
+     */
+    function showFormAlert(type, message) {
+      const box = document.getElementById('formAlert');
+      if (type === 'error') {
+        box.className =
+          'mb-5 rounded-2xl p-4 text-xs sm:text-sm border bg-rose-50 text-rose-800 border-rose-200 whitespace-pre-line font-semibold animate-fade-in';
+      } else {
+        box.className =
+          'mb-5 rounded-2xl p-4 text-xs sm:text-sm border bg-[#e5ebf0] text-[#3E4C59] border-[#b8c5d1] whitespace-pre-line font-semibold animate-fade-in';
+      }
+      box.textContent = message;
+      box.classList.remove('hidden');
+    }
+
+    /**
+     * إخفاء رسالة التنبيه
+     */
+    function hideFormAlert() {
+      const box = document.getElementById('formAlert');
+      box.classList.add('hidden');
+      box.textContent = '';
+    }
+
+    /**
+     * إعادة ضبط جميع الفلاتر والبحث
+     */
+    function clearAllFilters() {
+      document.getElementById('filterRoom').value = 'ALL';
+      document.getElementById('filterDate').value = '';
+      document.getElementById('filterSearch').value = '';
+      renderBookings();
+    }
+
+    /**
+     * تحديث العدادات العامة وعدّادات القاعات الثلاث
+     */
+    function renderCounts() {
+      document.getElementById('totalBookingsCount').textContent = bookings.length;
+
+      ROOMS.forEach((roomName, index) => {
+        const count = bookings.filter((b) => b.room === roomName).length;
+        const badge = document.getElementById(`roomCount-${index}`);
+        if (badge) {
+          badge.textContent = count === 1 ? 'حجز واحد' : `${count} حجوزات`;
+          if (count > 0) {
+            badge.className =
+              'text-xs font-bold px-2.5 py-1 rounded-full bg-[#3E4C59] text-white border border-[#2c3741]';
+          } else {
+            badge.className =
+              'text-xs font-bold px-2.5 py-1 rounded-full bg-[#e5ebf0] text-[#3E4C59] border border-[#c6d1dc]';
+          }
+        }
+      });
+    }
+
+    /**
+     * عرض بطاقات الحجوزات المسجلة بعد تطبيق الفلاتر والبحث والترتيب الزمني
+     */
+    function renderBookings() {
+      const container = document.getElementById('bookingsContainer');
+      const filterRoom = document.getElementById('filterRoom').value;
+      const filterDate = document.getElementById('filterDate').value;
+      const filterSearch = document.getElementById('filterSearch').value.trim().toLowerCase();
+      const clearBar = document.getElementById('clearFiltersBar');
+      const countBadge = document.getElementById('filteredCountBadge');
+
+      const hasActiveFilter =
+        filterRoom !== 'ALL' || Boolean(filterDate) || Boolean(filterSearch);
+      clearBar.classList.toggle('hidden', !hasActiveFilter);
+
+      // تصفية الحجوزات
+      const filtered = bookings.filter((item) => {
+        if (filterRoom !== 'ALL' && item.room !== filterRoom) return false;
+        if (filterDate && item.date !== filterDate) return false;
+        if (filterSearch) {
+          const haystack = `${item.department} ${item.organizer} ${item.topic} ${item.room}`.toLowerCase();
+          if (!haystack.includes(filterSearch)) return false;
+        }
+        return true;
+      });
+
+      // ترتيب الحجوزات تصاعدياً حسب التاريخ ثم وقت البداية
+      filtered.sort((a, b) => {
+        if (a.date !== b.date) {
+          return a.date.localeCompare(b.date);
+        }
+        return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
+      });
+
+      countBadge.textContent =
+        filtered.length === 1 ? 'حجز واحد' : `${filtered.length} حجوزات`;
+
+      // إذا لم تكن هناك حجوزات مسجلة مطلقاً أو لا توجد نتائج مطابقة للفلتر
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="border border-dashed border-[#b8c5d1] rounded-2xl py-12 px-6 text-center bg-[#eef2f6]/70">
+            <div class="w-12 h-12 rounded-2xl bg-[#e5ebf0] text-[#3E4C59] flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p class="text-sm font-bold text-slate-800">
+              ${
+                bookings.length === 0
+                  ? 'لا توجد حجوزات مسجلة حالياً في النظام'
+                  : 'لا توجد حجوزات مطابقة لمعايير البحث أو الفلترة الحالية'
+              }
+            </p>
+            <p class="text-xs text-slate-600 mt-1">
+              ${
+                bookings.length === 0
+                  ? 'يمكن لأي قسم إنشاء حجز جديد من النموذج الجانبي مباشرة.'
+                  : 'جرّب تغيير القاعة أو التاريخ أو مسح الفلاتر.'
+              }
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      // رسم بطاقات الحجوزات المرتبة
+      container.innerHTML = filtered
+        .map((booking) => {
+          const isEditingThis = editingBookingId === booking.id;
+          return `
+            <article class="rounded-2xl border ${
+              isEditingThis
+                ? 'border-[#3E4C59] bg-[#eef2f6] ring-2 ring-[#3E4C59]/20'
+                : 'border-[#cbd5e1] bg-white hover:border-[#3E4C59]'
+            } p-4 sm:p-5 transition-all shadow-2xs animate-fade-in">
+              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div class="space-y-1.5">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-[#3E4C59] text-white">
+                      ${escapeHtml(booking.room)}
+                    </span>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#e5ebf0] text-[#3E4C59] border border-[#c6d1dc]">
+                      القسم: ${escapeHtml(booking.department)}
+                    </span>
+                    ${
+                      isEditingThis
+                        ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">قيد التعديل</span>'
+                        : ''
+                    }
+                  </div>
+
+                  <h3 class="text-sm sm:text-base font-extrabold text-slate-900 pt-0.5">
+                    ${escapeHtml(booking.topic)}
+                  </h3>
+                </div>
+
+                <!-- أزرار التعديل والإلغاء -->
+                <div class="flex items-center gap-2 self-end sm:self-start shrink-0">
+                  <button
+                    type="button"
+                    onclick="startEditBooking('${escapeHtml(booking.id)}')"
+                    class="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#e5ebf0] hover:bg-[#3E4C59] text-[#3E4C59] hover:text-white border border-[#c6d1dc] transition-colors cursor-pointer"
+                  >
+                    تعديل
+                  </button>
+                  <button
+                    type="button"
+                    onclick="openDeleteModal('${escapeHtml(booking.id)}')"
+                    class="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/70 transition-colors cursor-pointer"
+                  >
+                    إلغاء الحجز
+                  </button>
+                </div>
+              </div>
+
+              <!-- تفاصيل التاريخ والوقت والمسؤول -->
+              <div class="mt-3.5 pt-3 border-t border-slate-200/80 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-600">
+                <div class="flex items-center gap-1.5 font-semibold text-slate-700">
+                  <svg class="w-4 h-4 text-[#3E4C59] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>${escapeHtml(formatArabicDate(booking.date))}</span>
+                </div>
+
+                <div class="flex items-center gap-1.5 font-bold text-slate-800">
+                  <svg class="w-4 h-4 text-[#3E4C59] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>من ${escapeHtml(formatArabicTime(booking.startTime))} إلى ${escapeHtml(formatArabicTime(booking.endTime))}</span>
+                </div>
+
+                <div class="flex items-center gap-1.5 text-slate-600">
+                  <svg class="w-4 h-4 text-[#3E4C59]/70 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span>المنسق: <strong class="font-bold text-slate-700">${escapeHtml(booking.organizer)}</strong></span>
+                </div>
+              </div>
+            </article>
+          `;
+        })
+        .join('');
+    }
+
+    /**
+     * تحديث كامل لواجهة العدادات والحجوزات
+     */
+    function renderAll() {
+      renderCounts();
+      renderBookings();
+      if (document.getElementById('roomSelect').value) {
+        liveCheckConflict();
+      }
+    }
+
+    /**
+     * حماية النصوص من حقن HTML (XSS)
+     */
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
